@@ -6,27 +6,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
-/* ---------------------------------------------------
-   GLOBAL
---------------------------------------------------- */
-body {
-  margin: 0;
-  background: #020204;
-  font-family: "Fira Code", monospace;
-  overflow: hidden;
-  color: #00f6ff;
+:root {
+  --bg: #020208;
+  --cyan: #00f6ff;
+  --magenta: #ff00c8;
+  --red: #ff3355;
+  --green: #00ff9c;
+  --text: #e8f9ff;
+  --muted: #7aa3b8;
+  --terminal-font: "Fira Code", "SF Mono", Menlo, Monaco, Consolas, monospace;
 }
 
-/* Neon cyberpunk fog */
+/* GLOBAL */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: radial-gradient(circle at top, #050816 0, #020208 55%, #000 100%);
+  color: var(--cyan);
+  font-family: var(--terminal-font);
+  overflow: hidden;
+}
+
+/* Neon fog */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 30% 20%, rgba(0,255,255,0.12), transparent 60%),
-    radial-gradient(circle at 70% 80%, rgba(255,0,200,0.12), transparent 60%);
+    radial-gradient(circle at 20% 20%, rgba(0,246,255,0.18), transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(255,0,200,0.18), transparent 60%);
   filter: blur(40px);
-  z-index: -1;
+  z-index: -2;
 }
 
 /* Scanlines */
@@ -45,21 +59,126 @@ body::after {
   z-index: 999;
 }
 
-/* ---------------------------------------------------
-   TERMINAL FRAME
---------------------------------------------------- */
+/* TERMINAL AREA */
 #terminal {
   position: absolute;
   inset: 0;
-  padding: 40px;
+  padding: 32px 20px;
   overflow: hidden;
-  color: #00f6ff;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   white-space: pre-wrap;
 }
 
-/* Glitch layers */
+/* ICE ALERT OVERLAY */
+#ice-alert {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 0, rgba(255,0,0,0.25), transparent 55%),
+    radial-gradient(circle at 90% 100%, rgba(255,0,0,0.18), transparent 55%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: iceFlash 3s ease-in-out forwards;
+  pointer-events: none;
+}
+
+/* MATRIX BACKGROUND */
+#matrix {
+  position: fixed;
+  inset: 0;
+  font-size: 11px;
+  color: rgba(0,255,200,0.16);
+  pointer-events: none;
+  white-space: pre;
+  overflow: hidden;
+  opacity: 0;
+  animation: matrixFade 3s ease-in-out forwards 1.2s;
+  z-index: -1;
+}
+
+/* PROFILE PANEL */
+#profile {
+  margin-top: 10px;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: revealProfile 2.8s ease forwards 12.5s;
+}
+
+/* SECTION STYLES */
+.section-title {
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.section-title span {
+  color: var(--cyan);
+}
+
+.label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 10px;
+}
+
+.value {
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* TAGS */
+.tag-row {
+  margin-top: 4px;
+}
+
+.tag {
+  display: inline-block;
+  border-radius: 999px;
+  border: 1px solid rgba(0,246,255,0.6);
+  padding: 2px 8px;
+  font-size: 10px;
+  margin: 2px 4px 2px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--cyan);
+}
+
+/* EXPERIENCE */
+.exp-item {
+  margin-bottom: 8px;
+}
+
+.exp-title {
+  color: var(--text);
+}
+
+.exp-meta {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.exp-desc {
+  color: var(--text);
+  font-size: 12px;
+}
+
+/* EDUCATION / CERTS LISTS */
+.list-item {
+  color: var(--text);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+/* GLITCH TITLE */
 .glitch {
   position: relative;
   display: inline-block;
@@ -76,57 +195,40 @@ body::after {
 }
 
 .glitch::before {
-  color: #ff00c8;
+  color: var(--magenta);
   transform: translate(2px, -2px);
   animation: glitchTop 1.8s infinite linear alternate-reverse;
 }
 
 .glitch::after {
-  color: #00f6ff;
+  color: var(--cyan);
   transform: translate(-2px, 2px);
   animation: glitchBottom 1.8s infinite linear alternate-reverse;
 }
 
-/* ICE red alert overlay */
-#ice-alert {
-  position: fixed;
-  inset: 0;
-  background: rgba(255,0,0,0.08);
-  mix-blend-mode: screen;
-  opacity: 0;
-  animation: iceFlash 2.5s ease-in-out forwards;
+/* CURSOR */
+.cursor {
+  display: inline-block;
+  width: 10px;
+  height: 16px;
+  background: var(--cyan);
+  margin-left: 4px;
+  animation: blink 0.8s infinite;
 }
 
-/* Code rain flicker */
-#matrix {
-  position: fixed;
-  inset: 0;
-  font-size: 12px;
-  color: rgba(0,255,200,0.15);
-  pointer-events: none;
-  white-space: pre;
-  overflow: hidden;
-  opacity: 0;
-  animation: matrixFade 3s ease-in-out forwards 1.5s;
+/* ANIMATIONS */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
 }
 
-/* Profile panel */
-#profile {
-  opacity: 0;
-  transform: translateY(40px);
-  animation: revealProfile 2.5s ease forwards 12s;
-}
-
-/* ---------------------------------------------------
-   ANIMATIONS
---------------------------------------------------- */
 @keyframes iceFlash {
   0% { opacity: 0; }
-  20% { opacity: 0.4; }
-  40% { opacity: 0.15; }
-  60% { opacity: 0.35; }
-  80% { opacity: 0.1; }
-  100% { opacity: 0.25; }
+  20% { opacity: 0.5; }
+  40% { opacity: 0.2; }
+  60% { opacity: 0.45; }
+  80% { opacity: 0.18; }
+  100% { opacity: 0.3; }
 }
 
 @keyframes glitchTop {
@@ -151,19 +253,12 @@ body::after {
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Typing cursor */
-.cursor {
-  display: inline-block;
-  width: 10px;
-  height: 16px;
-  background: #00f6ff;
-  margin-left: 4px;
-  animation: blink 0.8s infinite;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  50.01%, 100% { opacity: 0; }
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  #terminal {
+    padding: 20px 10px;
+    font-size: 12px;
+  }
 }
 </style>
 </head>
@@ -172,31 +267,26 @@ body::after {
 
 <div id="ice-alert"></div>
 <div id="matrix"></div>
-
 <div id="terminal"></div>
 
 <script>
-/* ---------------------------------------------------
-   MATRIX CODE GENERATOR
---------------------------------------------------- */
+/* MATRIX BACKGROUND */
 const matrix = document.getElementById("matrix");
-const chars = "01<>/\\{}[]#@*&$%";
+const chars = "01<>/\\\\{}[]#@*&$%";
 function randomChar() {
   return chars[Math.floor(Math.random() * chars.length)];
 }
 function generateMatrix() {
   let out = "";
-  for (let i = 0; i < 2200; i++) {
+  for (let i = 0; i < 2600; i++) {
     out += randomChar();
-    if (i % 80 === 0) out += "\n";
+    if (i % 90 === 0) out += "\\n";
   }
   matrix.textContent = out;
 }
 generateMatrix();
 
-/* ---------------------------------------------------
-   BOOT LOG SEQUENCE
---------------------------------------------------- */
+/* BOOT / BREACH LOG */
 const terminal = document.getElementById("terminal");
 
 const lines = [
@@ -215,7 +305,7 @@ const lines = [
   "[OVERRIDE] CORE ACCESS ACHIEVED",
   "",
   "[PAYLOAD] Extracting subject profile: DMITRII MIKHEEV",
-  "[PAYLOAD] Decrypting AV/IT/FinTech layers...",
+  "[PAYLOAD] Decrypting AV / IT / FinTech layers...",
   "[PAYLOAD] Payload integrity: 100%",
   "",
   ">>> PROFILE EXTRACTED — DISPLAYING"
@@ -239,55 +329,145 @@ function typeLine() {
     terminal.textContent = buffer;
     setTimeout(typeLine, 18 + Math.random() * 40);
   } else {
-    buffer += "\n";
+    buffer += "\\n";
     idx++;
     char = 0;
     setTimeout(typeLine, 120);
   }
 }
 
+/* PROFILE REVEAL */
 function showProfile() {
   terminal.innerHTML += `
 <div id="profile">
   <br>
   <span class="glitch" data-text="DMITRII MIKHEEV" style="font-size:22px;">DMITRII MIKHEEV</span>
-  <br><br>
-  Founder, AV technologist & fintech engineer  
-  Founder & CEO — Onolite Solutions  
-  Founder — Turquoise Events Global  
-  Miami–Fort Lauderdale Area  
+  <br><span class="muted">Founder & CEO | Onolite Solutions · Turquoise Events Global · AV Technologist · FinTech Engineer</span>
+  <br><span class="muted">Miami–Fort Lauderdale Area</span>
   <br><br>
 
-  <strong>// SUMMARY</strong><br>
-  Visionary engineer blending AV production, IT architecture,  
-  and FinTech-grade reliability into automated ecosystems.  
-  Designs scalable, secure systems for hospitality, enterprise,  
-  and financial environments with a focus on clarity and UX.  
-  <br><br>
+  <div class="section-title"><span>//</span> SUMMARY</div>
+  <div class="value">
+    Systems-minded founder and engineer blending <strong>AV production</strong>, <strong>IT architecture</strong>,
+    and <strong>FinTech-grade reliability</strong> into cohesive, automated ecosystems. Designs and operates
+    infrastructure that spans luxury hospitality venues, live event environments, and mission-critical banking
+    systems—always with an obsession for clarity, resilience, and human-centered experience.
+    <br><br>
+    Comfortable moving between <strong>hands-on technical work</strong> (Java, Spring Boot, microservices, AV systems,
+    networking) and <strong>strategic leadership</strong> (product direction, service design, team culture, turquoise
+    organizational principles). Passionate about building organizations where autonomy, transparency, and purpose
+    are not buzzwords but operational defaults.
+  </div>
 
-  <strong>// EXPERIENCE</strong><br>
-  • Founder — Turquoise Events Global (2025–Present)<br>
-    Premium AV/IT event production using turquoise principles.<br><br>
+  <div class="section-title"><span>//</span> CORE TAGS</div>
+  <div class="tag-row">
+    <span class="tag">AV / IT Convergence</span>
+    <span class="tag">Event Technology</span>
+    <span class="tag">FinTech Systems</span>
+    <span class="tag">Java / Spring Boot</span>
+    <span class="tag">Microservices</span>
+    <span class="tag">WebAssembly (WASM)</span>
+    <span class="tag">IT Architecture</span>
+    <span class="tag">Information Security</span>
+    <span class="tag">SEO & Growth</span>
+    <span class="tag">Turquoise Organizations</span>
+    <span class="tag">Team Leadership</span>
+  </div>
 
-  • Founder & CEO — Onolite Solutions (2025–Present)<br>
-    IT ecosystems, automation, security, SEO-driven growth.<br><br>
+  <div class="section-title"><span>//</span> EXPERIENCE</div>
 
-  • AV — Pier Sixty-Six Resort / Pinnacle Live (2025–Present)<br>
-    Networked AV, automated event tech systems.<br><br>
+  <div class="exp-item">
+    <div class="exp-title">Founder — Turquoise Events Global</div>
+    <div class="exp-meta">Miami, Florida · 2025 – Present · Event Production · AV / IT · Turquoise Principles</div>
+    <div class="exp-desc">
+      Builds a purpose-driven event production company grounded in self-management, transparency, and evolutionary purpose.
+      Designs premium AV/IT experiences for luxury hospitality, conferences, and high-impact activations, empowering
+      technicians as autonomous leaders rather than order-takers.
+    </div>
+  </div>
 
-  • AV Lead — Fontainebleau Miami Beach / Encore (2023–2025)<br>
-    Luxury hospitality AV operations.<br><br>
+  <div class="exp-item">
+    <div class="exp-title">Founder & CEO — Onolite Solutions</div>
+    <div class="exp-meta">Fort Lauderdale, Florida · 2025 – Present · IT Solutions · Security · Automation</div>
+    <div class="exp-desc">
+      Leads an IT services and consulting company focused on efficiency, security, and digital growth. Delivers
+      managed IT, automation, and SEO-driven web solutions for South Florida businesses, with an emphasis on
+      reliability, observability, and long-term partnerships rather than quick fixes.
+    </div>
+  </div>
 
-  • Lead IT Engineer — Sberbank (2020–2022)<br>
-    Microservices, Spring Boot, secure FinTech systems.<br><br>
+  <div class="exp-item">
+    <div class="exp-title">AV — Pier Sixty-Six Resort · Pinnacle Live</div>
+    <div class="exp-meta">Fort Lauderdale, Florida · 2025 – Present · Event Technology · Networked AV</div>
+    <div class="exp-desc">
+      Integrates modern, networked AV systems into a luxury resort environment. Bridges traditional AV workflows
+      with IT-driven, automated, and remotely observable solutions to deliver smarter, more resilient event technology.
+    </div>
+  </div>
 
-  • IT Chief Engineer — Bank of Russia (2013–2020)<br>
-    Core banking systems, InfoSec, leadership.<br><br>
+  <div class="exp-item">
+    <div class="exp-title">AV Lead — Fontainebleau Miami Beach · Encore</div>
+    <div class="exp-meta">Miami Beach, Florida · 2023 – 2025 · Luxury Hospitality · AV Operations</div>
+    <div class="exp-desc">
+      Led AV operations for high-end meetings, conferences, and entertainment events in a fast-paced luxury hotel.
+      Coordinated teams, managed complex show setups, and ensured technical excellence under tight timelines and
+      demanding client expectations.
+    </div>
+  </div>
 
-  <strong>// SKILLS</strong><br>
-  Java · Spring Boot · Microservices · WASM · AV Systems ·  
-  Event Production · IT Architecture · InfoSec · SEO ·  
-  Leadership · FinTech · Support Engineering  
+  <div class="exp-item">
+    <div class="exp-title">Lead IT Engineer — Sberbank</div>
+    <div class="exp-meta">Moscow, Russia · 2020 – 2022 · FinTech · Microservices · Spring Boot</div>
+    <div class="exp-desc">
+      Developed and maintained microservices-based banking systems using Java and Spring Boot. Worked on secure,
+      scalable architectures supporting mission-critical financial workflows, with a focus on reliability,
+      observability, and regulatory compliance.
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-title">IT Chief Engineer — Bank of Russia</div>
+    <div class="exp-meta">Moscow, Russia · 2013 – 2020 · Core Banking · InfoSec · Leadership</div>
+    <div class="exp-desc">
+      Oversaw regional banking information systems, led IT support and engineering teams, and built information
+      security infrastructure for high-stakes financial environments. Balanced operational stability with gradual
+      modernization of legacy systems.
+    </div>
+  </div>
+
+  <div class="section-title"><span>//</span> SKILLS</div>
+  <div class="value">
+    <strong>Engineering & Architecture:</strong> Java, Spring Boot, microservices, REST APIs, WebAssembly (WASM),
+    distributed systems, integration patterns, monitoring & observability.<br>
+    <strong>AV & Event Tech:</strong> Live sound, projection, LED walls, show control, networked AV, signal flow,
+    show calling, venue integration, hospitality AV operations.<br>
+    <strong>IT & Security:</strong> Infrastructure design, networking, virtualization, backup & recovery, endpoint
+    management, access control, security hardening, incident response.<br>
+    <strong>Business & Growth:</strong> SEO, content strategy, digital presence, service design, client success,
+    process optimization, turquoise organizational design, leadership.
+  </div>
+
+  <div class="section-title"><span>//</span> EDUCATION</div>
+  <div class="list-item">
+    HSE Tikhonov Moscow Institute of Electronics and Mathematics — Engineering / IT (details to customize)
+  </div>
+
+  <div class="section-title"><span>//</span> CERTIFICATIONS & HIGHLIGHTS</div>
+  <div class="list-item">Scrum / Agile foundations (e.g., PSM I or equivalent — adjust as needed)</div>
+  <div class="list-item">Information security and banking systems experience across regulated environments</div>
+  <div class="list-item">Author of articles on WASM, HR & AI, and turquoise organizations</div>
+
+  <div class="section-title"><span>//</span> OPERATING MODES</div>
+  <div class="value">
+    • <strong>Founder Mode:</strong> Building companies, products, and cultures that can run without constant firefighting.<br>
+    • <strong>Netrunner Mode:</strong> Diving deep into systems, code, and infrastructure to make things faster, safer, and clearer.<br>
+    • <strong>Integrator Mode:</strong> Translating between AV techs, developers, executives, and clients so everyone sees the same picture.
+  </div>
+
+  <div class="section-title"><span>//</span> STATUS</div>
+  <div class="value">
+    ACCESS GRANTED · NODE COMPROMISED · PROFILE STREAM STABLE
+  </div>
 </div>
 `;
 }
