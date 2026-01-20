@@ -2,157 +2,71 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>BLACK ICE BOOTLOADER // DMITRII MIKHEEV</title>
+<title>BLACK ICE BREACH // DMITRII MIKHEEV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
-:root {
-  --bg: #020305;
-  --green: #00ff9c;
-  --green-dim: #00b36b;
-  --red: #ff3366;
-  --amber: #ffcc33;
-  --white: #f5f5f5;
-  --scanline: rgba(255,255,255,0.04);
-  --terminal-font: "Fira Code", "SF Mono", Menlo, Monaco, Consolas, monospace;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* ---------------------------------------------------
+   GLOBAL
+--------------------------------------------------- */
 body {
-  background: radial-gradient(circle at top, #050810 0, #020305 55%, #000 100%);
-  color: var(--green);
-  font-family: var(--terminal-font);
+  margin: 0;
+  background: #020204;
+  font-family: "Fira Code", monospace;
   overflow: hidden;
+  color: #00f6ff;
 }
 
-/* CRT + scanlines */
+/* Neon cyberpunk fog */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  pointer-events: none;
   background:
-    repeating-linear-gradient(
-      to bottom,
-      var(--scanline) 0px,
-      var(--scanline) 1px,
-      transparent 2px,
-      transparent 4px
-    );
-  mix-blend-mode: soft-light;
-  opacity: 0.5;
-  z-index: 999;
+    radial-gradient(circle at 30% 20%, rgba(0,255,255,0.12), transparent 60%),
+    radial-gradient(circle at 70% 80%, rgba(255,0,200,0.12), transparent 60%);
+  filter: blur(40px);
+  z-index: -1;
 }
 
-/* Subtle vignette */
+/* Scanlines */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03) 0px,
+    rgba(255,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
   pointer-events: none;
-  background:
-    radial-gradient(circle at center, transparent 0, transparent 50%, rgba(0,0,0,0.9) 100%);
-  z-index: 998;
+  z-index: 999;
 }
 
-/* Centered terminal frame */
-.terminal-frame {
+/* ---------------------------------------------------
+   TERMINAL FRAME
+--------------------------------------------------- */
+#terminal {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.terminal {
-  width: 100%;
-  max-width: 980px;
-  height: 520px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,255,156,0.4);
-  background: radial-gradient(circle at top left, #07110f 0, #020305 60%);
-  box-shadow:
-    0 0 25px rgba(0,255,156,0.25),
-    0 0 60px rgba(0,0,0,0.9);
+  padding: 40px;
   overflow: hidden;
-  position: relative;
-}
-
-/* Top bar */
-.terminal-header {
-  height: 32px;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  background: linear-gradient(to right, #050b09, #07110f);
-  border-bottom: 1px solid rgba(0,255,156,0.25);
-  color: var(--green-dim);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.header-dots {
-  display: flex;
-  gap: 6px;
-  margin-right: 10px;
-}
-
-.header-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #222;
-}
-
-.header-dot.red { background: var(--red); }
-.header-dot.amber { background: var(--amber); }
-.header-dot.green { background: var(--green); }
-
-/* Content area */
-.terminal-body {
-  position: absolute;
-  inset: 32px 0 0 0;
-  padding: 14px 18px;
-  font-size: 13px;
+  color: #00f6ff;
+  font-size: 14px;
   line-height: 1.5;
-  overflow: hidden;
-}
-
-/* Boot log area */
-#boot-log {
   white-space: pre-wrap;
-  color: var(--green);
 }
 
-/* Cursor */
-.cursor {
-  display: inline-block;
-  width: 8px;
-  height: 14px;
-  background: var(--green);
-  margin-left: 2px;
-  animation: blink 0.9s steps(1, end) infinite;
-}
-
-/* Glitch title */
-.glitch-title {
-  font-size: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  margin-bottom: 6px;
+/* Glitch layers */
+.glitch {
   position: relative;
   display: inline-block;
 }
 
-.glitch-title::before,
-.glitch-title::after {
+.glitch::before,
+.glitch::after {
   content: attr(data-text);
   position: absolute;
   left: 0;
@@ -161,352 +75,224 @@ body::after {
   mix-blend-mode: screen;
 }
 
-.glitch-title::before {
-  color: #00f6ff;
-  transform: translate(1px, -1px);
-  animation: glitchTop 2s infinite linear alternate-reverse;
-}
-
-.glitch-title::after {
+.glitch::before {
   color: #ff00c8;
-  transform: translate(-1px, 1px);
-  animation: glitchBottom 2s infinite linear alternate-reverse;
+  transform: translate(2px, -2px);
+  animation: glitchTop 1.8s infinite linear alternate-reverse;
 }
 
-/* Profile panel (revealed after boot) */
-#profile-panel {
-  margin-top: 10px;
-  border-top: 1px solid rgba(0,255,156,0.3);
-  padding-top: 8px;
-  display: none;
+.glitch::after {
+  color: #00f6ff;
+  transform: translate(-2px, 2px);
+  animation: glitchBottom 1.8s infinite linear alternate-reverse;
 }
 
-.section-title {
-  color: var(--white);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 11px;
-  margin-top: 10px;
-  margin-bottom: 4px;
+/* ICE red alert overlay */
+#ice-alert {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,0,0,0.08);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: iceFlash 2.5s ease-in-out forwards;
 }
 
-.section-title span {
-  color: var(--green);
-}
-
-.label {
-  color: var(--green-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 10px;
-}
-
-.value {
-  color: var(--white);
-  margin-bottom: 6px;
-}
-
-.tag-row {
-  margin-top: 4px;
-}
-
-.tag {
-  display: inline-block;
-  border-radius: 999px;
-  border: 1px solid rgba(0,255,156,0.5);
-  padding: 2px 8px;
-  font-size: 10px;
-  margin: 2px 4px 2px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--green);
-}
-
-/* Experience list */
-.exp-item {
-  margin-bottom: 6px;
-}
-
-.exp-title {
-  color: var(--white);
-}
-
-.exp-meta {
-  color: var(--green-dim);
-  font-size: 11px;
-}
-
-.exp-desc {
-  color: var(--white);
+/* Code rain flicker */
+#matrix {
+  position: fixed;
+  inset: 0;
   font-size: 12px;
+  color: rgba(0,255,200,0.15);
+  pointer-events: none;
+  white-space: pre;
+  overflow: hidden;
+  opacity: 0;
+  animation: matrixFade 3s ease-in-out forwards 1.5s;
 }
 
-/* Access granted banner */
-.access-banner {
-  margin-top: 8px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(0,255,156,0.6);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--white);
-  background: rgba(0,255,156,0.08);
+/* Profile panel */
+#profile {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: revealProfile 2.5s ease forwards 12s;
 }
 
-.access-led {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 10px rgba(0,255,156,0.9);
-}
-
-/* Animations */
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  50.01%, 100% { opacity: 0; }
+/* ---------------------------------------------------
+   ANIMATIONS
+--------------------------------------------------- */
+@keyframes iceFlash {
+  0% { opacity: 0; }
+  20% { opacity: 0.4; }
+  40% { opacity: 0.15; }
+  60% { opacity: 0.35; }
+  80% { opacity: 0.1; }
+  100% { opacity: 0.25; }
 }
 
 @keyframes glitchTop {
   0% { clip-path: inset(0 0 80% 0); }
-  20% { clip-path: inset(0 0 10% 0); }
-  40% { clip-path: inset(0 0 60% 0); }
-  60% { clip-path: inset(0 0 30% 0); }
-  80% { clip-path: inset(0 0 50% 0); }
-  100% { clip-path: inset(0 0 20% 0); }
+  50% { clip-path: inset(0 0 20% 0); }
+  100% { clip-path: inset(0 0 60% 0); }
 }
 
 @keyframes glitchBottom {
   0% { clip-path: inset(80% 0 0 0); }
-  20% { clip-path: inset(10% 0 0 0); }
-  40% { clip-path: inset(60% 0 0 0); }
-  60% { clip-path: inset(30% 0 0 0); }
-  80% { clip-path: inset(50% 0 0 0); }
-  100% { clip-path: inset(20% 0 0 0); }
+  50% { clip-path: inset(20% 0 0 0); }
+  100% { clip-path: inset(60% 0 0 0); }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .terminal {
-    height: 520px;
-  }
-  .terminal-body {
-    font-size: 12px;
-  }
+@keyframes matrixFade {
+  from { opacity: 0; }
+  to { opacity: 0.35; }
+}
+
+@keyframes revealProfile {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Typing cursor */
+.cursor {
+  display: inline-block;
+  width: 10px;
+  height: 16px;
+  background: #00f6ff;
+  margin-left: 4px;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
 }
 </style>
 </head>
+
 <body>
 
-<div class="terminal-frame">
-  <div class="terminal">
-    <div class="terminal-header">
-      <div class="header-dots">
-        <div class="header-dot red"></div>
-        <div class="header-dot amber"></div>
-        <div class="header-dot green"></div>
-      </div>
-      <span>BLACK ICE BOOTLOADER // PROFILE DECRYPTION NODE</span>
-    </div>
-    <div class="terminal-body">
-      <div id="boot-log"></div>
+<div id="ice-alert"></div>
+<div id="matrix"></div>
 
-      <div id="profile-panel">
-        <div class="glitch-title" data-text="Dmitrii Mikheev">Dmitrii Mikheev</div>
-        <div class="label">Headline</div>
-        <div class="value">
-          Founder, AV technologist &amp; fintech engineer · Founder &amp; CEO, Onolite Solutions · Turquoise Events Global
-        </div>
-
-        <div class="label">Location</div>
-        <div class="value">Miami–Fort Lauderdale Area · Hybrid Human / Machine Thinker</div>
-
-        <div class="section-title"><span>//</span> Summary</div>
-        <div class="value">
-          Visionary entrepreneur and systems engineer blending AV production, IT architecture, and FinTech-grade reliability.
-          Designs scalable, secure and automated ecosystems—from luxury hospitality AV stacks to banking software backbones—
-          with obsessive focus on user experience, operational clarity, and elegant technical design.
-        </div>
-
-        <div class="section-title"><span>//</span> Core Tags</div>
-        <div class="tag-row">
-          <span class="tag">AV / IT Convergence</span>
-          <span class="tag">Event Tech</span>
-          <span class="tag">FinTech Systems</span>
-          <span class="tag">Spring Boot / Java</span>
-          <span class="tag">SEO &amp; Growth</span>
-          <span class="tag">Turquoise Organizations</span>
-        </div>
-
-        <div class="section-title"><span>//</span> Experience Snapshot</div>
-
-        <div class="exp-item">
-          <div class="exp-title">Founder // Turquoise Events Global</div>
-          <div class="exp-meta">Miami, Florida · 2025 – Present · Event Production · AV / IT · Turquoise Principles</div>
-          <div class="exp-desc">
-            Purpose-driven event production built on self-management, transparency, and evolutionary purpose.
-            Designs premium AV/IT experiences for luxury hospitality and high-impact activations, empowering technicians as autonomous leaders.
-          </div>
-        </div>
-
-        <div class="exp-item">
-          <div class="exp-title">Founder &amp; CEO // Onolite Solutions</div>
-          <div class="exp-meta">Fort Lauderdale, Florida · 2025 – Present · IT Solutions · Security · Automation</div>
-          <div class="exp-desc">
-            Builds cutting-edge IT ecosystems focused on efficiency, security, and UX. Integrates advanced technology,
-            SEO strategy, and scalable architectures for modern businesses.
-          </div>
-        </div>
-
-        <div class="exp-item">
-          <div class="exp-title">AV // Pier Sixty-Six Resort · Pinnacle Live</div>
-          <div class="exp-meta">Fort Lauderdale, Florida · 2025 – Present · Event Technology · Networked AV</div>
-          <div class="exp-desc">
-            Redefines AV for high-end events by merging traditional systems with IT-driven, networked, and automated solutions—
-            creating smarter, more connected event technology.
-          </div>
-        </div>
-
-        <div class="exp-item">
-          <div class="exp-title">AV Lead // Fontainebleau Miami Beach · Encore</div>
-          <div class="exp-meta">Miami Beach, Florida · 2023 – 2025 · Luxury Hospitality · AV Operations</div>
-          <div class="exp-desc">
-            Led on-site AV teams delivering premium audio, video, and lighting experiences for high-end meetings,
-            conferences, and entertainment events in a fast-paced luxury environment.
-          </div>
-        </div>
-
-        <div class="exp-item">
-          <div class="exp-title">Lead IT Engineer // Sberbank</div>
-          <div class="exp-meta">Moscow, Russia · 2020 – 2022 · FinTech · Microservices · Spring Boot</div>
-          <div class="exp-desc">
-            Developed microservices-based banking systems using Java, Spring Boot, and secure architectures,
-            supporting mission-critical financial workflows.
-          </div>
-        </div>
-
-        <div class="exp-item">
-          <div class="exp-title">IT Chief Engineer // Bank of Russia</div>
-          <div class="exp-meta">Moscow, Russia · 2013 – 2020 · Core Banking · InfoSec · Leadership</div>
-          <div class="exp-desc">
-            Oversaw development and deployment of regional banking information systems, led IT support teams,
-            and built information security infrastructure for high-stakes financial environments.
-          </div>
-        </div>
-
-        <div class="section-title"><span>//</span> Core Skill Matrix</div>
-        <div class="tag-row">
-          <span class="tag">Java / Spring Boot</span>
-          <span class="tag">Microservices</span>
-          <span class="tag">WebAssembly (WASM)</span>
-          <span class="tag">AV Systems</span>
-          <span class="tag">Event Production</span>
-          <span class="tag">IT Architecture</span>
-          <span class="tag">Information Security</span>
-          <span class="tag">SEO &amp; Digital Growth</span>
-          <span class="tag">Scrum / PSM I</span>
-          <span class="tag">Team Leadership</span>
-          <span class="tag">FinTech / Banking</span>
-          <span class="tag">Support Engineering</span>
-        </div>
-
-        <div class="section-title"><span>//</span> Status</div>
-        <div class="access-banner">
-          <span class="access-led"></span>
-          <span>ACCESS GRANTED · SUBJECT ONLINE · BUILD v2.0</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="terminal"></div>
 
 <script>
-const bootLines = [
-  "BLACK ICE BOOTLOADER v3.9.22",
-  "© ONOLITE SOLUTIONS // INTERNAL NODE",
+/* ---------------------------------------------------
+   MATRIX CODE GENERATOR
+--------------------------------------------------- */
+const matrix = document.getElementById("matrix");
+const chars = "01<>/\\{}[]#@*&$%";
+function randomChar() {
+  return chars[Math.floor(Math.random() * chars.length)];
+}
+function generateMatrix() {
+  let out = "";
+  for (let i = 0; i < 2200; i++) {
+    out += randomChar();
+    if (i % 80 === 0) out += "\n";
+  }
+  matrix.textContent = out;
+}
+generateMatrix();
+
+/* ---------------------------------------------------
+   BOOT LOG SEQUENCE
+--------------------------------------------------- */
+const terminal = document.getElementById("terminal");
+
+const lines = [
+  ">>> INITIATING BLACK ICE BREACH PROTOCOL v7.2",
+  ">>> NEON CYBERNETIC INTERFACE ONLINE",
   "",
-  "[BOOT] Initializing secure runtime...",
-  "[OK]  Kernel integrity check",
-  "[OK]  Memory map verified",
-  "[OK]  Network interfaces: AV-NET / FIN-NET / EVENT-NET",
-  "[OK]  Quantum entropy pool seeded",
+  "[ALERT] UNAUTHORIZED ACCESS DETECTED",
+  "[ICE] COUNTERMEASURE DEPLOYMENT: RED ICE NODE CLUSTER",
+  "[ICE] THREAT LEVEL: CRITICAL",
   "",
-  "[MODULE] Loading identity scanner...",
-  "[OK]  Scanner online",
-  "[SCAN] Target: DMITRII MIKHEEV",
-  "[SCAN] Source: dmitrii-git.github.io",
-  "[HASH] 0xD3-M1-TR-11 // VERIFIED",
+  "[BREACH] Injecting cyan override vectors...",
+  "[BREACH] Slicing ICE lattice...",
+  "[BREACH] Encryption layers collapsing: 7 → 0",
   "",
-  "[DECRYPT] Unlocking profile payload...",
-  "[DECRYPT] AV / IT / FINTECH layers detected",
-  "[OK]  Decryption complete",
+  "[OVERRIDE] FIREWALL OVERRIDDEN",
+  "[OVERRIDE] CORE ACCESS ACHIEVED",
   "",
-  "[MOUNT] /profile/dmitrii_mikheev",
-  "[OK]  Filesystem mounted",
+  "[PAYLOAD] Extracting subject profile: DMITRII MIKHEEV",
+  "[PAYLOAD] Decrypting AV/IT/FinTech layers...",
+  "[PAYLOAD] Payload integrity: 100%",
   "",
-  ">> PRESS ENTER TO RENDER CYBERNETIC RESUME <<"
+  ">>> PROFILE EXTRACTED — DISPLAYING"
 ];
 
-const bootLogEl = document.getElementById("boot-log");
-const profilePanelEl = document.getElementById("profile-panel");
+let idx = 0;
+let char = 0;
+let buffer = "";
 
-let lineIndex = 0;
-let charIndex = 0;
-let typingLine = "";
-let bootFinished = false;
-
-function typeBoot() {
-  if (lineIndex >= bootLines.length) {
-    bootFinished = true;
-    bootLogEl.innerHTML += "\n\n> ";
-    const cursor = document.createElement("span");
-    cursor.className = "cursor";
-    bootLogEl.appendChild(cursor);
-    document.addEventListener("keydown", handleEnter);
-    document.addEventListener("click", handleEnter);
+function typeLine() {
+  if (idx >= lines.length) {
+    showProfile();
     return;
   }
 
-  const currentLine = bootLines[lineIndex];
+  const line = lines[idx];
 
-  if (charIndex < currentLine.length) {
-    typingLine += currentLine[charIndex];
-    charIndex++;
-    renderBoot();
-    setTimeout(typeBoot, 18 + Math.random() * 40);
+  if (char < line.length) {
+    buffer += line[char];
+    char++;
+    terminal.textContent = buffer;
+    setTimeout(typeLine, 18 + Math.random() * 40);
   } else {
-    typingLine += "\n";
-    lineIndex++;
-    charIndex = 0;
-    renderBoot();
-    setTimeout(typeBoot, 120);
+    buffer += "\n";
+    idx++;
+    char = 0;
+    setTimeout(typeLine, 120);
   }
 }
 
-function renderBoot() {
-  const linesSoFar = bootLines.slice(0, lineIndex).join("\n");
-  bootLogEl.textContent = linesSoFar + (lineIndex < bootLines.length ? "\n" + typingLine : typingLine);
+function showProfile() {
+  terminal.innerHTML += `
+<div id="profile">
+  <br>
+  <span class="glitch" data-text="DMITRII MIKHEEV" style="font-size:22px;">DMITRII MIKHEEV</span>
+  <br><br>
+  Founder, AV technologist & fintech engineer  
+  Founder & CEO — Onolite Solutions  
+  Founder — Turquoise Events Global  
+  Miami–Fort Lauderdale Area  
+  <br><br>
+
+  <strong>// SUMMARY</strong><br>
+  Visionary engineer blending AV production, IT architecture,  
+  and FinTech-grade reliability into automated ecosystems.  
+  Designs scalable, secure systems for hospitality, enterprise,  
+  and financial environments with a focus on clarity and UX.  
+  <br><br>
+
+  <strong>// EXPERIENCE</strong><br>
+  • Founder — Turquoise Events Global (2025–Present)<br>
+    Premium AV/IT event production using turquoise principles.<br><br>
+
+  • Founder & CEO — Onolite Solutions (2025–Present)<br>
+    IT ecosystems, automation, security, SEO-driven growth.<br><br>
+
+  • AV — Pier Sixty-Six Resort / Pinnacle Live (2025–Present)<br>
+    Networked AV, automated event tech systems.<br><br>
+
+  • AV Lead — Fontainebleau Miami Beach / Encore (2023–2025)<br>
+    Luxury hospitality AV operations.<br><br>
+
+  • Lead IT Engineer — Sberbank (2020–2022)<br>
+    Microservices, Spring Boot, secure FinTech systems.<br><br>
+
+  • IT Chief Engineer — Bank of Russia (2013–2020)<br>
+    Core banking systems, InfoSec, leadership.<br><br>
+
+  <strong>// SKILLS</strong><br>
+  Java · Spring Boot · Microservices · WASM · AV Systems ·  
+  Event Production · IT Architecture · InfoSec · SEO ·  
+  Leadership · FinTech · Support Engineering  
+</div>
+`;
 }
 
-function handleEnter(e) {
-  if (!bootFinished) return;
-  if (e.type === "click" || e.key === "Enter") {
-    document.removeEventListener("keydown", handleEnter);
-    document.removeEventListener("click", handleEnter);
-    revealProfile();
-  }
-}
-
-function revealProfile() {
-  bootLogEl.textContent += "\n[EXEC] Rendering cybernetic resume...\n[OK]  Output attached below.\n";
-  profilePanelEl.style.display = "block";
-}
-
-typeBoot();
+typeLine();
 </script>
 
 </body>
